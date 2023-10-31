@@ -1,6 +1,5 @@
 import prisma from '@/db'
 import Link from 'next/link'
-import { redirect } from 'next/navigation'
 import { Posts } from '../components/Posts'
 import { revalidatePath } from 'next/cache'
 
@@ -14,7 +13,7 @@ async function createNewPost(data: FormData) {
   }
 
   await prisma.post.create({ data: { title, content:"Hi" } });
-  redirect("/")
+  revalidatePath("/")
 }
 
 
