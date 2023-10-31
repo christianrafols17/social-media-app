@@ -1,18 +1,38 @@
 import prisma from '@/db'
-import { error } from 'console'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
+import { Posts } from '../components/Posts'
+import { revalidatePath } from 'next/cache'
 
 async function createNewPost(data: FormData) {
   "use server"
 
-  const title = data.get("title")?.valueOf()
+  const title = data.get("title")?.valueOf();
+
   if(typeof title !== "string" || title.length === 0) {
-    throw new Error("Invalid Title")
+    throw new Error ("Invalid Title");
   }
 
+  await prisma.post.create({ data: { title, content:"Hi" } });
+  redirect("/")
 }
 
-export default function Home() {
+
+async function deletePost(id: number) {
+  "use server"
+
+  await prisma.post.delete({ where: { id } })
+  revalidatePath("/")
+}
+
+
+function getPost() {
+  return prisma.post.findMany()
+}
+
+export default async function Home() {
+
+  const posts = await getPost()
   
   return (
     <>
@@ -30,6 +50,11 @@ export default function Home() {
             <input type='text' name='title' className='p-2 rounded-md text-black w-full'></input>
             <button type='submit' className='p-2 bg-slate-400 rounded-md'> Post </button>
           </form>
+          <ul>
+            {posts.map(post => (
+              <Posts key={post.id} {...post} deletePost={deletePost}/>
+            ))}
+          </ul>
         </div>
       </div>
     </>
