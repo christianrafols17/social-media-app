@@ -7,12 +7,17 @@ async function createNewPost(data: FormData) {
   "use server"
 
   const title = data.get("title")?.valueOf();
+  const content = data.get("content")?.valueOf();
 
   if(typeof title !== "string" || title.length === 0) {
     throw new Error ("Invalid Title");
   }
+  
+  if(typeof content !== "string" || content.length === 0) {
+    throw new Error ("Invalid Content");
+  }
 
-  await prisma.post.create({ data: { title, content:"Hi" } });
+  await prisma.post.create({ data: { title, content } });
   revalidatePath("/")
 }
 
@@ -46,8 +51,11 @@ export default async function Home() {
         <div className='flex flex-col bg-slate-600 w-3/4 min-h-screen mt-4 p-4'>
           <h1 className='text-2xl text-center pb-4'>Home Page</h1>
           <form action={createNewPost} className='flex w-full gap-2'>
-            <input type='text' name='title' className='p-2 rounded-md text-black w-full'></input>
-            <button type='submit' className='p-2 bg-slate-400 rounded-md'> Post </button>
+            <div className='flex flex-col gap-2 w-11/12'>
+              <input type='text' name='title' className='p-2 rounded-md text-black w-full' placeholder='Enter Title...'></input>
+              <textarea name='content' className='p-2 rounded-md text-black' placeholder='Enter Content...'></textarea>
+            </div>
+            <button type='submit' className='p-2 bg-slate-400 rounded-md w-1/12'> Post </button>
           </form>
           <ul>
             {posts.map(post => (
